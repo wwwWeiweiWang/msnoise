@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.fftpack
 import scipy.optimize
+import sys
 import scipy.signal
 from obspy.signal.invsim import cosine_taper
 from scipy.fftpack.helper import next_fast_len
@@ -38,7 +39,7 @@ def myCorr(data, maxlag, plot=False, nfft=None):
 
     maxlag = np.round(maxlag)
 
-    Nt = data.shape[1]
+    Nt = data.shape[1]  # number of points after F transform
 
     # data = scipy.fftpack.fft(data,int(Nfft),axis=1)
 
@@ -48,8 +49,9 @@ def myCorr(data, maxlag, plot=False, nfft=None):
         plt.subplot(212)
         plt.plot(np.arange(len(data[1])) * 0.05, np.abs(data[1]))
 
-    corr = np.conj(data[0]) * data[1]
-    corr = np.real(scipy.fftpack.ifft(corr, nfft)) / Nt
+    corr = np.conj(data[0]) * data[1] # the one with conjugate is master station; the order of data[0,1] is in accord with output name 0-1
+    corr = np.real(scipy.fftpack.ifft(corr, nfft)) / Nt # real part of ifft of corr
+
     corr = np.concatenate((corr[-Nt + 1:], corr[:Nt + 1]))
 
     if plot:

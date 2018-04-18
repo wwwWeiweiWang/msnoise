@@ -300,9 +300,13 @@ def main(stype, interval=1.0):
                                     #~ jobs.append(job)
                         
                         elif stype == "ref":
+                            p1name=str(int(1/f.high))
+                            p2name=str(int(1/f.low))
                             stack_path = os.path.join(
                                 "STACKS", "%02i" % filterid, "REF", components)
-                            ref_name = "%s_%s" % (sta1, sta2)
+                            sta1name=sta1.split('_')[1]
+                            sta2name=sta2.split('_')[1]
+                            ref_name = "%s-%s.%s.%s-%s%s" % (sta1name, sta2name, components, p1name, p2name, 's')
                             filename = os.path.join(stack_path, ref_name)
                             stack_total = scipy.signal.detrend(stack_total)
 

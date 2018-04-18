@@ -258,13 +258,18 @@ def main():
             logging.info('Processing pair: %s' % pair.replace(':', ' vs '))
             tt = time.time()
             station1, station2 = pair.split(':')
+
+            #print 'station1, 2'
+            #print station1
+            #print station2
+
             pair = (np.where(stations == station1)
                     [0][0], np.where(stations == station2)[0][0])
 
             s1 = get_station(db, station1.split('.')[0], station1.split('.')[1])
             s2 = get_station(db, station2.split('.')[0], station2.split('.')[1])
 
-            if s1.X and params.components_to_compute != ["ZZ", ]:
+            if s1.X and params.components_to_compute not in [["ZZ", ], ["HH", ]]:
                 X0, Y0, c0 = (s1.X, s1.Y, s1.coordinates)
                 X1, Y1, c1 = (s2.X, s2.Y, s1.coordinates)
 
@@ -282,7 +287,7 @@ def main():
                 logging.debug("Processing {!s}".format(components))
                 t1 = stream.select(network=s1.net, station=s1.sta)
                 t2 = stream.select(network=s2.net, station=s2.sta)
-                if (components == "ZZ") \
+                if (components in ["ZZ", 'HH']) \
                         or ("E" in components)\
                         or ("N" in components)\
                         or ("1" in components)\
@@ -293,11 +298,11 @@ def main():
                     logging.debug('Rotating streams, making sure they are'
                                   ' aligned')
 
-                    if components[0] == "Z":
+                    if components[0] in ["Z", "H"]:
                         t1 = t1.select(component=components[0])
                     else:
                         t1_novert = t1.copy()
-                        for tr in t1_novert.select(component="Z"):
+                        for tr in t1_novert.select(component=components[0]):
                             t1_novert.remove(tr)
                         if len(t1_novert):
                             # Make these streams contain the same gaps
@@ -307,11 +312,11 @@ def main():
                         else:
                             t1 = t1_novert
 
-                    if components[1] == "Z":
+                    if components[1] in ["Z", "H"]:
                         t2 = t2.select(component=components[1])
                     else:
                         t2_novert = t2.copy()
-                        for tr in t2_novert.select(component="Z"):
+                        for tr in t2_novert.select(component=components[1]):
                             t2_novert.remove(tr)
                         if len(t2_novert):
                             # Make these streams contain the same gaps
@@ -372,6 +377,7 @@ def main():
 
                     tmp1 = tmp1[0]
                     tmp2 = tmp2[0]
+                    
                     nfft = next_fast_len(tmp1.stats.npts)
 
                     whitening = True
@@ -410,6 +416,7 @@ def main():
                                 skip = True
                                 logging.debug('Slice RMS is smaller (%e) than rms_threshold (%e)!'
                                               % (tmp[i].data.std(), rms_threshold))
+                        
                         if not skip:
                             corr = myCorr(trames2hWb, np.ceil(params.maxlag / dt), plot=False, nfft=nfft)
                             if not np.all(np.isfinite(corr)):

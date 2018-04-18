@@ -4,6 +4,7 @@ import itertools
 import logging
 import os
 import glob
+import sys
 
 try:
     import cPickle
@@ -929,8 +930,10 @@ def add_corr(session, station1, station2, filterid, date, time, duration,
         mseed = True
 
     if day:
+        station1name=station1.split('_')[1]
+        station2name=station2.split('_')[1]
         path = os.path.join("STACKS", "%02i" % filterid, "001_DAYS", components,
-                            "%s_%s" % (station1, station2), str(date))
+                            "%s_%s" % (station1name, station2name), str(date))
         pair = "%s:%s" % (station1, station2)
         if mseed:
             export_mseed(session, path, pair, components, filterid, CF,
@@ -1051,9 +1054,16 @@ def get_results(session, station1, station2, filterid, components, dates,
     export_format = get_config(session, 'export_format')
     stack_data = np.zeros((len(dates), get_maxlag_samples(session))) * np.nan
     i = 0
+    station1name=station1.split('_')[1]
+    station2name=station2.split('_')[1]
+    #print type(station1name) # unicode
+    #print type(station1) # unicode
+    #print type(components) #unicode
+    #print station1
+    #sys.exit(1)
     base = os.path.join("STACKS", "%02i" % filterid,
                         "%03i_DAYS" % mov_stack, components,
-                        "%s_%s" % (station1, station2), "%s")
+                        "%s_%s" % (station1name, station2name), "%s")
     if export_format == "BOTH":
         base += ".MSEED"
         export_format = "MSEED"
